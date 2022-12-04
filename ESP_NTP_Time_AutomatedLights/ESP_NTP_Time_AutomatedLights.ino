@@ -10,6 +10,10 @@ const char *ssid = "MADT";
 const char *password = "luckydumpy";
 WiFiUDP ntpUDP;
 
+String date_formatted;
+String month_formatted;
+String clean_date;
+
 // NTPClient timeClient(UDP& udp, const char* poolServerName, int timeOffset (5hr 30 mins -> 19800 sec), unsigned long updateInterval);
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 300000);
 
@@ -40,7 +44,10 @@ void setup() {
 void loop() {
   timeClient.update();
 
-//  Serial.println(timeClient.getFormattedTime());
+  // Get the Unix Epoch Time
+  time_t epochTime = timeClient.getEpochTime();
+
+  // Serial.println(timeClient.getFormattedTime());
   lcd.setCursor(2, 0);
 
   int hh = timeClient.getHours();
@@ -65,7 +72,7 @@ void loop() {
   lcd.print(sec);
 
   // condition to turn on/off the light (automated)
-  if (hh == 16) {
+  if (hh == 18) {
     digitalWrite(light, LOW);
   }
   else {
@@ -76,4 +83,34 @@ void loop() {
   lcd.print(" ");
   lcd.print(arr_days[day]);
 
+  // Get date from Epoch Time
+  struct tm *ptm = gmtime ((time_t *)&epochTime);
+
+  // store the date, month and year
+  int date = ptm->tm_mday;
+  int month = ptm->tm_mon + 1;
+  int year = ptm->tm_year + 1900;
+
+  // Format the date
+  if (date < 10) {
+    date_formatted = (0 + String(date));
+  }
+  else {
+    date_formatted = String(date);
+  }
+
+  // Format the month
+  if (month < 10) {
+    month_formatted = (0 + String(month));
+  }
+  else {
+    month_formatted = String(month);
+  }
+
+  clean_date = (date_formatted + "/" + month_formatted + "/" + String(year));
+  // uncomment for debug only
+  // Serial.println(clean_date); 
+
+  lcd.setCursor(3, 1);
+  lcd.print(clean_date);
 }
