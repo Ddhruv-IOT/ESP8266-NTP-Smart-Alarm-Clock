@@ -15,7 +15,6 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 300000);
 
 String intro[] = {"H", "E", "L", "L", "O", " ", "W", "O", "R", "L", "D"};
 String arr_days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-String date_time;
 
 void setup() {
   pinMode(light, OUTPUT);
@@ -65,6 +64,7 @@ void loop() {
   }
   lcd.print(sec);
 
+  // condition to turn on/off the light (automated)
   if (hh == 16) {
     digitalWrite(light, LOW);
   }
