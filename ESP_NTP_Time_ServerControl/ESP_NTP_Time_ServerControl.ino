@@ -20,6 +20,7 @@ String clean_date;
 const char* PARAM_INPUT_1 = "input1";
 const char* PARAM_INPUT_2 = "input2";
 const char* PARAM_INPUT_3 = "input3";
+String d = " ";
 
 // NTPClient timeClient(UDP& udp, const char* poolServerName, int timeOffset (5hr 30 mins -> 19800 sec), unsigned long updateInterval);
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 300000);
@@ -89,9 +90,9 @@ void serverCstm() {
       inputParam = "none";
     }
     Serial.println(inputMessage);
-    request->send(200, "text/html", "HTTP GET request sent to your ESP on input field ("
-                  + inputParam + ") with value: " + inputMessage +
-                  "<br><a href=\"/\">Return to Home Page</a>");
+    lcd.clear();
+    d = inputMessage;
+    request->send(200, "text/html", index_html);
   });
   server.onNotFound(notFound);
   server.begin();
@@ -198,7 +199,7 @@ void loop() {
 
   lcd.setCursor(3, 1);
   //lcd.print(clean_date);
-  lcd.print(PARAM_INPUT_1);
+  lcd.print(d);
 
   // condition to turn on/off the light (automated)
   if (hh == 14) {
