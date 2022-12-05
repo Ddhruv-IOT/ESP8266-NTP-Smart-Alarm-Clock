@@ -71,14 +71,6 @@ void loop() {
   }
   lcd.print(sec);
 
-  // condition to turn on/off the light (automated)
-  if (hh == 18) {
-    digitalWrite(light, LOW);
-  }
-  else {
-    digitalWrite(light, HIGH);
-  }
-
   int day = timeClient.getDay();
   lcd.print(" ");
   lcd.print(arr_days[day]);
@@ -109,8 +101,17 @@ void loop() {
 
   clean_date = (date_formatted + "/" + month_formatted + "/" + String(year));
   // uncomment for debug only
-  // Serial.println(clean_date); 
+  // Serial.println(clean_date);
 
   lcd.setCursor(3, 1);
   lcd.print(clean_date);
+
+  // condition to turn on/off the light (automated)
+  if (hh == 14) {
+    digitalWrite(light, LOW);
+  }
+  // lights will turn off after 1hr from the given time
+  else {
+    digitalWrite(light, HIGH);
+  }
 }
