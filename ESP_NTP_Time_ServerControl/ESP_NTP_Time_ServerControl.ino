@@ -92,7 +92,7 @@ void serverCstm() {
     Serial.println(inputMessage);
     lcd.clear();
     d = inputMessage;
-    request->send(200, "text/html", index_html);
+    request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " + inputMessage + ":00 Hrs <br>"  );
   });
   server.onNotFound(notFound);
   server.begin();
