@@ -44,16 +44,12 @@ const char index_html[] PROGMEM = R"rawliteral(
           Enter hours: <input type="text" name="input1">
           <br/>
           <br/>
-          Enter mins: &nbsp<input type="text" name="input2">
+          Enter mins: &nbsp &nbsp<input type="text" name="input2">
           <br/>
           <br/>
           <input type="submit" value="Submit">
         </form>
         <br>
-        <!--form action="/get">
-          input3: <input type="text" name="input3">
-          <input type="submit" value="Submit">
-        </form-->
     </body>
 </html>)rawliteral";
 
@@ -74,19 +70,13 @@ void serverCstm() {
     String input2;
     String inputParam;
 
-    // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
     if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2)) {
       input1 = request->getParam(PARAM_INPUT_1)->value();
       input2 = request->getParam(PARAM_INPUT_2)->value();
     }
 
-    // GET input3 value on <ESP_IP>/get?input3=<inputMessage>
-    //    else if (request->hasParam(PARAM_INPUT_3)) {
-    //      input1 = request->getParam(PARAM_INPUT_3)->value();
-    //    }
-
     else {
-      input1 = "No message sent";
+      input1 = "No Alarm Set";
       inputParam = "none";
     }
 
@@ -203,9 +193,17 @@ void loop() {
 
   lcd.setCursor(3, 1);
   lcd.print(clean_date);
-  
-//  lcd.setCursor(2, 1);
-//  lcd.print("Alarm: " + h_set + ":" + m_set);
+  if (hh == h_set.toInt()) {
+    lcd.setCursor(15, 1);
+    lcd.print("A");
+  }
+  else {
+    lcd.setCursor(15, 1);
+    lcd.print(" ");
+  }
+
+  //  lcd.setCursor(2, 1);
+  //  lcd.print("Alarm: " + h_set + ":" + m_set);
 
   // condition to turn on/off the light (automated)
   if (hh == h_set.toInt()) {
