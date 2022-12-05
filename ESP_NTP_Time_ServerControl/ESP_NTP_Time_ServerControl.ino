@@ -39,14 +39,16 @@ const char index_html[] PROGMEM = R"rawliteral(
       </head>
       <body>
         <form action="/get">
-          input1: <input type="text" name="input1">
+          Enter hours : <input type="text" name="input1">
+          Enter mins  : <input type="text" name="input2">
+          <br/>
           <input type="submit" value="Submit">
         </form>
         <br>
-        <form action="/get">
-          input2: <input type="text" name="input2">
-          <input type="submit" value="Submit">
-        </form>
+//        <form action="/get">
+//          input2: <input type="text" name="input2">
+//          <input type="submit" value="Submit">
+//        </form>
         <br>
         <form action="/get">
           input3: <input type="text" name="input3">
@@ -69,11 +71,13 @@ void serverCstm() {
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request) {
     String inputMessage;
+    String input2 =  " ";
     String inputParam;
     // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
-    if (request->hasParam(PARAM_INPUT_1)) {
+    if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2)) {
       inputMessage = request->getParam(PARAM_INPUT_1)->value();
-      inputParam = PARAM_INPUT_1;
+      //      inputParam = PARAM_INPUT_1;
+      input2 = request->getParam(PARAM_INPUT_2)->value();
     }
     // GET input2 value on <ESP_IP>/get?input2=<inputMessage>
     else if (request->hasParam(PARAM_INPUT_2)) {
@@ -89,7 +93,7 @@ void serverCstm() {
       inputMessage = "No message sent";
       inputParam = "none";
     }
-    Serial.println(inputMessage);
+    Serial.println(inputMessage + " " + input2);
     lcd.clear();
     d = inputMessage;
     request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " + inputMessage + ":00 Hrs <br>"  );
@@ -131,7 +135,7 @@ void setup() {
 
   timeClient.begin();
   lcd.clear();
-  
+
   serverCstm();
 }
 
