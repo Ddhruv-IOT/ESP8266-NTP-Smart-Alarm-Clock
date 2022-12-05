@@ -202,7 +202,7 @@ void loop() {
   lcd.print(d);
 
   // condition to turn on/off the light (automated)
-  if (hh == 14) {
+  if (hh == d.toInt()) {
     digitalWrite(light, LOW);
   }
   // lights will turn off after 1hr from the given time
