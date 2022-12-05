@@ -197,7 +197,8 @@ void loop() {
   // Serial.println(clean_date);
 
   lcd.setCursor(3, 1);
-  lcd.print(clean_date);
+  //lcd.print(clean_date);
+  lcd.print(PARAM_INPUT_1);
 
   // condition to turn on/off the light (automated)
   if (hh == 14) {
