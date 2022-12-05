@@ -20,7 +20,9 @@ String clean_date;
 const char* PARAM_INPUT_1 = "input1";
 const char* PARAM_INPUT_2 = "input2";
 const char* PARAM_INPUT_3 = "input3";
-String d = " ";
+
+String h_set = " ";
+String m_set = " ";
 
 // NTPClient timeClient(UDP& udp, const char* poolServerName, int timeOffset (5hr 30 mins -> 19800 sec), unsigned long updateInterval);
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 300000);
@@ -39,21 +41,19 @@ const char index_html[] PROGMEM = R"rawliteral(
       </head>
       <body>
         <form action="/get">
-          Enter hours : <input type="text" name="input1">
-          Enter mins  : <input type="text" name="input2">
+          Enter hours: <input type="text" name="input1">
+          <br/>
+          <br/>
+          Enter mins: &nbsp<input type="text" name="input2">
+          <br/>
           <br/>
           <input type="submit" value="Submit">
         </form>
         <br>
-//        <form action="/get">
-//          input2: <input type="text" name="input2">
-//          <input type="submit" value="Submit">
-//        </form>
-        <br>
-        <form action="/get">
+        <!--form action="/get">
           input3: <input type="text" name="input3">
           <input type="submit" value="Submit">
-        </form>
+        </form-->
     </body>
 </html>)rawliteral";
 
@@ -70,33 +70,33 @@ void serverCstm() {
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request) {
-    String inputMessage;
-    String input2 =  " ";
+    String input1;
+    String input2;
     String inputParam;
+
     // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
     if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2)) {
-      inputMessage = request->getParam(PARAM_INPUT_1)->value();
-      //      inputParam = PARAM_INPUT_1;
+      input1 = request->getParam(PARAM_INPUT_1)->value();
       input2 = request->getParam(PARAM_INPUT_2)->value();
     }
-    // GET input2 value on <ESP_IP>/get?input2=<inputMessage>
-    else if (request->hasParam(PARAM_INPUT_2)) {
-      inputMessage = request->getParam(PARAM_INPUT_2)->value();
-      inputParam = PARAM_INPUT_2;
-    }
+
     // GET input3 value on <ESP_IP>/get?input3=<inputMessage>
-    else if (request->hasParam(PARAM_INPUT_3)) {
-      inputMessage = request->getParam(PARAM_INPUT_3)->value();
-      inputParam = PARAM_INPUT_3;
-    }
+    //    else if (request->hasParam(PARAM_INPUT_3)) {
+    //      input1 = request->getParam(PARAM_INPUT_3)->value();
+    //    }
+
     else {
-      inputMessage = "No message sent";
+      input1 = "No message sent";
       inputParam = "none";
     }
-    Serial.println(inputMessage + " " + input2);
+
+    Serial.println("Time: " + input1 + " " + input2);
     lcd.clear();
-    d = inputMessage;
-    request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " + inputMessage + ":00 Hrs <br>"  );
+
+    h_set = input1;
+    m_set = input2;
+
+    request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " + input1 + ":" + input2 + "Hrs <br>"  );
   });
   server.onNotFound(notFound);
   server.begin();
@@ -203,10 +203,10 @@ void loop() {
 
   lcd.setCursor(3, 1);
   //lcd.print(clean_date);
-  lcd.print(d);
+  lcd.print("Alarm: " + h_set + ":" + m_set);
 
   // condition to turn on/off the light (automated)
-  if (hh == d.toInt()) {
+  if (hh == h_set.toInt()) {
     digitalWrite(light, LOW);
   }
   // lights will turn off after 1hr from the given time
