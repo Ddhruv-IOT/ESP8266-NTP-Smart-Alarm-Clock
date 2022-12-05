@@ -202,8 +202,10 @@ void loop() {
   // Serial.println(clean_date);
 
   lcd.setCursor(3, 1);
-  //lcd.print(clean_date);
-  lcd.print("Alarm: " + h_set + ":" + m_set);
+  lcd.print(clean_date);
+  
+//  lcd.setCursor(2, 1);
+//  lcd.print("Alarm: " + h_set + ":" + m_set);
 
   // condition to turn on/off the light (automated)
   if (hh == h_set.toInt()) {
