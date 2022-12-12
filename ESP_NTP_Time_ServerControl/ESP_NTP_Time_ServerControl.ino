@@ -5,7 +5,7 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-#define light 2
+#define light 13
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 AsyncWebServer server(80);
 
@@ -207,10 +207,10 @@ void loop() {
 
   // condition to turn on/off the light (automated)
   if (hh == h_set.toInt()) {
-    digitalWrite(light, LOW);
+    digitalWrite(light, HIGH);
   }
   // lights will turn off after 1hr from the given time
   else {
-    digitalWrite(light, HIGH);
+    digitalWrite(light, LOW);
   }
 }
