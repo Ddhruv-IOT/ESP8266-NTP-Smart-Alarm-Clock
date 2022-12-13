@@ -24,6 +24,10 @@ const char* PARAM_INPUT_3 = "input3";
 
 String h_set = " ";
 String m_set = " ";
+int flag = 0; // to track if light is on or off (Led Bulb)
+int flag_lcd = 1; // to track lcd backlight
+
+int t_flag = 0;
 
 // NTPClient timeClient(UDP& udp, const char* poolServerName, int timeOffset (5hr 30 mins -> 19800 sec), unsigned long updateInterval);
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 300000);
@@ -51,6 +55,10 @@ const char index_html[] PROGMEM = R"rawliteral(
           <input type="submit" value="Submit">
         </form>
         <br>
+        <p> lcd backlight </p>
+        <button onclick="window.location='http://'+location.hostname+'/dis/on'"> ON / OFF </button>
+        <p> Toggle Led Bulb </p>
+        <button onclick="window.location='http://'+location.hostname+'/lamp/on'"> ON / OFF </button>
     </body>
 </html>)rawliteral";
 
@@ -67,39 +75,72 @@ void serverCstm() {
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request) {
+
+
     String input1;
     String input2;
     String inputParam;
+    int eeAddress = 0;
+    if (t_flag == 0) {
+      t_flag = 1;
+      if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2)) {
 
-    if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2)) {
 
-      int eeAddress = 0;
 
-      input1 = request->getParam(PARAM_INPUT_1)->value();
-      input2 = request->getParam(PARAM_INPUT_2)->value();
+        input1 = request->getParam(PARAM_INPUT_1)->value();
+        input2 = request->getParam(PARAM_INPUT_2)->value();
 
-      EEPROM.put(eeAddress, input1);
-      //      eeAddress += sizeof(int);
-      //
-      //      EEPROM.put(eeAddress, input1.toInt());
-      EEPROM.commit();
+        EEPROM.put(eeAddress, input1);
+        EEPROM.commit();
+        Serial.print("Written");
+      }
 
-      Serial.print("Written");
+      else {
+        input1 = "No Alarm Set";
+        inputParam = "none";
+      }
+
+      Serial.println("Time: " + input1 + " " + input2);
+      lcd.clear();
+
+      h_set = input1;
+      m_set = input2;
     }
-
-    else {
-      input1 = "No Alarm Set";
-      inputParam = "none";
-    }
-
-    Serial.println("Time: " + input1 + " " + input2);
-    lcd.clear();
-
-    h_set = input1;
-    m_set = input2;
-
     request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " + input1 + ":" + input2 + "Hrs <br>"  );
   });
+
+
+  server.on("/dis/on", HTTP_GET, [] (AsyncWebServerRequest * request) {
+
+    if (flag_lcd == 0) {
+      flag_lcd = 1;
+      lcd.backlight();
+    }
+    else if (flag_lcd == 1) {
+      flag_lcd = 0;
+      lcd.noBacklight();
+    }
+    else {
+      ;
+    }
+    request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " +  h_set + ":" + m_set + "Hrs <br>"  );
+  });
+
+  server.on("/lamp/on", HTTP_GET, [] (AsyncWebServerRequest * request) {
+    if (flag == 0) {
+      flag = 1;
+      digitalWrite(light, HIGH);
+    }
+    else if (flag == 1) {
+      flag = 0;
+      digitalWrite(light, LOW);
+    }
+    else {
+      ;
+    }
+    request->send(200, "text/html", String(index_html) + "<br> Alarm Set for: " +  h_set + ":" + m_set + "Hrs <br>"  );
+  });
+
   server.onNotFound(notFound);
   server.begin();
 }
@@ -150,6 +191,7 @@ void setup() {
 
   serverCstm();
 }
+
 
 void loop() {
   timeClient.update();
@@ -215,13 +257,19 @@ void loop() {
 
   lcd.setCursor(3, 1);
   lcd.print(clean_date);
+
   if (hh == h_set.toInt()) {
     lcd.setCursor(15, 1);
     lcd.print("A");
+    lcd.backlight();
+    flag_lcd = 3;
   }
   else {
     lcd.setCursor(15, 1);
     lcd.print(" ");
+    if (flag_lcd == 3) {
+      flag_lcd = 1;
+    }
   }
 
   //  lcd.setCursor(2, 1);
@@ -229,10 +277,16 @@ void loop() {
 
   // condition to turn on/off the light (automated)
   if (hh == h_set.toInt()) {
+    flag = 3;
+
     digitalWrite(light, HIGH);
   }
   // lights will turn off after 1hr from the given time
   else {
-    digitalWrite(light, LOW);
+    t_flag = 0;
+    if (flag != 1) {
+      flag = 0;
+      digitalWrite(light, LOW);
+    }
   }
 }
